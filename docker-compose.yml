@@ -1,9 +1,7 @@
-version: '3.9'
-
 services:
   wordpress:
     image: wordpress:latest
-    container_name: wordpress
+    container_name: cms_wordpress
     ports:
       - "8080:80"
     environment:
@@ -12,7 +10,9 @@ services:
       WORDPRESS_DB_USER: user
       WORDPRESS_DB_PASSWORD: password
     volumes:
-      - ./wordpress:/var/www/html   # mount source ra thư mục local
+      - ./wordpress:/var/www/html
+      # tùy chọn: nâng limit upload cho WordPress (Apache/PHP trong container)
+      - ./docker/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     networks:
       - wordpress_network
     depends_on:
@@ -20,12 +20,16 @@ services:
 
   db:
     image: mysql:5.7
-    container_name: db
+    container_name: cms_db
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: wordpress
       MYSQL_USER: user
       MYSQL_PASSWORD: password
+    command: [
+      "--max_allowed_packet=256M",
+      "--innodb_log_file_size=256M"
+    ]
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -33,11 +37,12 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
-    container_name: phpmyadmin
+    container_name: cms_phpmyadmin
     environment:
       PMA_HOST: db
       PMA_USER: root
       PMA_PASSWORD: rootpassword
+      UPLOAD_LIMIT: 64M   # tăng giới hạn upload cho phpMyAdmin
     ports:
       - "8081:80"
     networks:
@@ -46,7 +51,7 @@ services:
       - db
 
 volumes:
-  db_data:   # chỉ cần volume cho database
+  db_data:
 
 networks:
   wordpress_network:

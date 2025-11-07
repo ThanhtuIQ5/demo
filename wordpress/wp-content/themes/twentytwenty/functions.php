@@ -880,3 +880,18 @@ add_filter( 'twentytwenty_can_show_post_thumbnail', function( $can_show ) {
 	return $can_show;
 } );
 
+// Thêm Sidebar trái
+function theme_register_sidebars() {
+    register_sidebar(array(
+        'name'          => __('Sidebar Trái', 'your-theme'),
+        'id'            => 'sidebar-left',
+        'description'   => __('Hiển thị bên trái trang tìm kiếm hoặc bài viết.', 'your-theme'),
+        'before_widget' => '<div id="%1$s" class="widget %2$s">',
+        'after_widget'  => '</div>',
+        'before_title'  => '<h3 class="widget-title">',
+        'after_title'   => '</h3>',
+    ));
+}
+add_action('widgets_init', 'theme_register_sidebars');
+
+
